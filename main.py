@@ -1,6 +1,13 @@
 import os
-import requests
-saved_words_filename = 'savedwords.txt'
+
+WORD_BOOK_FILENAME = 'wordbook.txt'
+
+try:
+    open(WORD_BOOK_FILENAME)
+except FileNotFoundError:
+    print(f"Please ensure that {WORD_BOOK_FILENAME} exists in folder")
+    print("Exiting...")
+    os._exit(1)
 
 try:
     import requests
@@ -11,20 +18,14 @@ except ImportError:
     print("Exiting...")
     os._exit(1)
 
-
-
-
 class Word:
     def __init__(self):
         self.BASE_API_URL = "https://api.dictionaryapi.dev/api/v2/entries/en/"
-    
+
 
     def check_word_existence(self, word_choice):
         endpoint = self.make_request(word_choice)
-        if endpoint.status_code == 200:
-            return True
-        else:
-            return False
+        return endpoint.status_code == 200
 
     def make_request(self, word_choice):
         endpoint_url = self.BASE_API_URL + word_choice
@@ -59,39 +60,60 @@ class Word:
             for antonym in antonyms:
                 print(f'-{antonym}')
         else:
-            print("No antonyms")
+            print("No antonyms found.")
 
 class Favorites:
-    def __init__(self, filename='savedwords.txt'):
+    def __init__(self, filename=WORD_BOOK_FILENAME):
         self.filename = filename
         try:
             with open(self.filename) as f:
                 self.saved_words = f.read().splitlines()
         except FileNotFoundError:
             self.saved_words = []
-    
+
     def upload_word(self, word_choice_save):
         with open(self.filename, "a") as f:
             f.write(word_choice_save + '\n')
-            print("\nSuccessfully Added.")
+            print("\nSuccessfully Saved!")
 
-    def remove_word():
-        pass
+    def remove_word(self, word_to_remove):
+        with open(WORD_BOOK_FILENAME) as f:
+            savedwords_text = f.read()
+        wordslist = savedwords_text.split()
+        if word_to_remove in wordslist:
+            wordslist.remove(word_to_remove)
+            with open(self.filename, "w") as f:
+                for word in wordslist:
+                    f.write(word + "\n")
+                print("Successfully Removed!")
+        else:
+            print("Word not found.")
+
     def view_favorites(self):
-        try:
-            with open(saved_words_filename) as f:
-                savedwords_text = f.read()
-        except:
-            savedwords_text = ''
+        with open(WORD_BOOK_FILENAME) as f:
+            savedwords_text = f.read()
         word_list = savedwords_text.split()
-        print("Saved words:")
+        print("\n--Saved words--")
         for word in word_list:
             print(word)
+        print()
 
+def wordbook_remove_options():
+    favorites_instance = Favorites()
+    favorites_instance.view_favorites()
+    while True:
+        remove_choice = input("Enter 'm' for menu or 'x' to remove a word: ").lower()
+        if remove_choice == "m":
+            break
+        elif remove_choice == "x":
+            word_to_remove = input("Enter word to remove: ").capitalize()
+            favorites_instance.remove_word(word_to_remove)
+        else:
+            print("\n--Invalid input--\n")
 
 def menu():
-    wordapi = Word()
-    favoritesapi = Favorites()
+    word_instance = Word()
+    favorites_instance = Favorites()
     while True:
         print("\nWELCOME TO EDWARD'S ENGLISH DICTIONARY")
         print("Would you like to:")
@@ -101,22 +123,32 @@ def menu():
         print("4. Exit")
         choice = input("Enter Choice: ").lower()
         if choice == "1":
-            word_choice = str(input("\nEnter Word:"))
-            if not wordapi.check_word_existence(word_choice):
+            word_choice = str(input("\nEnter Word:")).capitalize()
+            if not word_instance.check_word_existence(word_choice):
                 print(f"\nNo results for {word_choice}.")
             else:
-                wordapi.get_definitions(word_choice)
-                wordapi.get_synonyms(word_choice)
-                wordapi.get_antonyms(word_choice)
+                word_instance.get_definitions(word_choice)
+                word_instance.get_synonyms(word_choice)
+                word_instance.get_antonyms(word_choice)
         elif choice == "2":
-            word_choice_save = str(input("Enter word to save: "))
-            favoritesapi.upload_word(word_choice_save)
+            word_to_save = str(input("Enter word to save: ")).capitalize()
+            if not word_instance.check_word_existence(word_to_save):
+                print("\nWord not found.")
+            else:
+                favorites_instance.upload_word(word_to_save)
         elif choice == "3":
-            favoritesapi.view_favorites()
+            with open(WORD_BOOK_FILENAME) as f:
+                wordbook_text = f.read()
+            wordbook_list = wordbook_text.split()
+            if wordbook_list:
+                wordbook_remove_options()
+            else:
+                print("\nNo words have been saved yet.")
         elif choice == "4":
             print("\nGoodbye...\n")
             os._exit(0)
         else:
             print("\nInvalid Choice.")
+
 if __name__ == "__main__":
     menu()
