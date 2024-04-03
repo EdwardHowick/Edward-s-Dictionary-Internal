@@ -1,4 +1,5 @@
 import os
+import sys
 
 WORD_BOOK_FILENAME = 'wordbook.txt'
 
@@ -23,18 +24,33 @@ class Word:
     """A class representing a word and it's properties."""
 
     def __init__(self):
+        """Initializes the Word class with a URL"""
         self.BASE_API_URL = "https://api.dictionaryapi.dev/api/v2/entries/en/"
 
     def check_word_existence(self, word_choice):
-        """This function is used to check whether a valid response is recieved from the requests to the api"""
-        """By making a request to the api and returning a status code it can catch any errors with the request"""
+        """Checks whether a valid response is recieved from the requests.
+        
+        Parameters:
+            word_choice (str): The word to check existence for.
+
+        Returns:
+            bool: True if the word exists, otherwise False.
+        """
 
         endpoint = self.make_request(word_choice)
-        return endpoint.status_code == 200
+        return endpoint.status_code == 200 #returns true if word in dictionary, otherwise false
 
     def make_request(self, word_choice):
-        """This functions purpose is to make a request to the api and returns the data in the form of a endpoint variable"""
-        endpoint_url = self.BASE_API_URL + word_choice
+        """Makes a request to the api and returns the data in the form of a endpoint variable.
+        
+        Parameters:
+            word_choice (str): The word to recieve data for.
+
+        Returns:
+            variable: The data for the word.
+        """
+
+        endpoint_url = self.BASE_API_URL + word_choice #creates the url to send to the api.
         try:
             endpoint = requests.get(endpoint_url) #sends request to api using url.
             return endpoint #retrieves data as endpoint variable.
@@ -43,10 +59,14 @@ class Word:
             os._exit(1)
 
     def get_definitions(self, word_choice):
-        """This function makes a request to the api for the users chosen word."""
-        """Then retreives the data from the api in the form of the variable endpoint"""
-        """Before changing the format of the data to be accessed in the form of lists"""
-        """Lastly I just access the list of data and filter the definitions before displaying it to the user."""
+        """Displays the definitons of a chosen word to the user.
+        
+        Parameters:
+            word_choice (str): The word to recieve data for.
+        
+        Returns:
+            None
+        """
 
         endpoint = self.make_request(word_choice) #makes request and retrives data.
         json_data = endpoint.json() #formats the data.
@@ -56,35 +76,40 @@ class Word:
             print(f"-{definition['definition']}")
 
     def get_synonyms(self, word_choice):
-        """The purpose of this function is to display the synonyms of a chosen word to the user"""
-        
-        endpoint = self.make_request(word_choice)
-        """The purpose of this function is to make a request to the api for data on a word"""
-        """This function first makes a request to the api for the users chosen word."""
-        """Then retreives the data from the api in the form of the variable endpoint."""
-        """Before using a function to change the format of the data to be accessed in the form of lists."""
-        """Lastly I just access the list of data and filter the synonyms before displaying it to the user."""
+        """Displays the synonyms of a chosen word to the user.
 
+        Parameters:
+            word_choice (str): The word to recieve data for.
+
+        Returns:
+            None
+        """
+
+        endpoint = self.make_request(word_choice) #makes request and retrieves the data.
         json_data = endpoint.json() #formats the data.
         synonyms = json_data[0]['meanings'][0]['synonyms'] #filters the data.
         print(f"\nSYNONYMS of {word_choice}:")
-        if synonyms:#verifies synonyms found in dictionary.
+        if synonyms:#verifies synonyms are found in dictionary.
             for synonym in synonyms: #displays data.
                 print(f'-{synonym}')
         else:
             print("No synonyms found.")
 
     def get_antonyms(self, word_choice):
-        """The purpose of this function is to display the antonyms of a chosen word to the user."""
-        """Firstly this function retreives the data from the api in the form of the variable endpoint."""
-        """Before using a function to change the format of the data to be accessed in the form of lists."""
-        """Lastly it access the list of data and filters the synonyms before displaying it to the user."""
+        """Displays the antonyms of a chosen word to the user.
+        
+        Parameters:
+            word_choice (str): The word to recieve data for.
+        
+        Returns:
+            None
+        """
 
         endpoint = self.make_request(word_choice) #makes request and retrieves the data.
-        json_data = endpoint.json() #formats the data
+        json_data = endpoint.json() #formats the data.
         antonyms = json_data[0]['meanings'][0]['antonyms'] #filters the data.
         print(f"\nANTONYMS of {word_choice}:")
-        if antonyms: #verifies antonyms found in dictionary.
+        if antonyms: #verifies antonyms are found in dictionary.
             for antonym in antonyms: #displays data.
                 print(f'-{antonym}')
         else:
@@ -92,37 +117,57 @@ class Word:
 
 
 class WordBook:
-    """A class representing a word book and its properties"""
+    """A class representing a word book and its properties."""
 
     def __init__(self, filename=WORD_BOOK_FILENAME):
-        """This function initializes the WorkBook class with a filename."""
+        """Initializes the WordBook class with the WordBook filename and saved_words."""
+
         self.filename = filename
         with open(self.filename) as f:
             self.saved_words = f.read().splitlines()
 
-    def view_favorites(self):
-        """This function"""
-        with open(WORD_BOOK_FILENAME) as f:
-            savedwords_text = f.read()
-        word_list = savedwords_text.split()
+    def view_wordbook(self):
+        """Displays the wordbook to the user.
+        
+        Parameters:
+            None
+        
+        Returns:
+            None
+        """
+
         print("\n--Saved words--")
-        for word in word_list:
+        for word in self.saved_words: #displays wordbook.
             print(word)
         print()
 
-    def upload_word(self, word_choice_save):
-        with open(self.filename, "a") as f:
-            f.write(word_choice_save + '\n')
+    def upload_word(self, word_to_upload):
+        """Uploads a word to the wordbook.txt file.
+        
+        Parameters:
+            word_to_upload (str): The word to upload.
+        
+        Returns:
+            None
+        """
+
+        with open(self.filename, "a") as f: #opens wordbook.txt text file and then appends the users word.
+            f.write(word_to_upload + '\n')
             print("\nSuccessfully Saved!")
 
     def remove_word(self, word_to_remove):
-        with open(WORD_BOOK_FILENAME) as f:
-            savedwords_text = f.read()
-        wordbook_list = savedwords_text.split()
-        if word_to_remove in wordbook_list:
-            wordbook_list.remove(word_to_remove)
-            with open(self.filename, "w") as f:
-                for word in wordbook_list:
+        """Removes a word from the wordbook.txt file.
+        
+        Parameters:
+            word_to_remove (str): The word to remove
+        
+        Returns:
+            None
+        """
+        if word_to_remove in self.saved_words: #makes sure the word to remove is in the wordbook list.
+            self.saved_words.remove(word_to_remove) #removes the word from the wordbook list.
+            with open(self.filename, "w") as f: #opens the wordbook text file in the write format.
+                for word in self.saved_words: #overrides the old wordbook.txt text file with the new wordbook list.
                     f.write(word + "\n")
                 print("\nSuccessfully Removed!\n")
         else:
@@ -130,22 +175,26 @@ class WordBook:
 
 
 def wordbook_remove_options():
+    """Sub-menu for the user to remove a word."""
+
     wordbook_instance = WordBook()
-    wordbook_instance.view_favorites()
-    while True:
+    wordbook_instance.view_wordbook()
+    while True: #remove options loop
         remove_choice = input("Enter 'm' for menu or 'x' to remove a word: ").lower()
 
-        if remove_choice == "m":
+        if remove_choice == "m": #returns the user to menu.
             break
 
-        elif remove_choice == "x":
+        elif remove_choice == "x": #allows user to remove a word.
             word_to_remove = input("Enter word to remove: ").capitalize()
-            wordbook_instance.remove_word(word_to_remove)
+            wordbook_instance.remove_word(word_to_remove) #removes word.
  
         else:
             print("\n--Invalid input--\n")
 
 def menu():
+    """Main menu for english dictionary."""
+
     word_instance = Word()
     wordbook_instance = WordBook()
     while True:
@@ -153,11 +202,11 @@ def menu():
         print("Would you like to:")
         print("1. Search Word")
         print("2. Save Word")
-        print("3. View Saved Words")
+        print("3. View WordBook")
         print("4. Exit")
-        choice = input("Enter Choice: ").lower()
+        choice = input("Enter Choice: ").lower() #input for branch choice.
 
-        if choice == "1":
+        if choice == "1": #search word branch
             word_choice = str(input("\nEnter Word:")).capitalize()
             if not word_instance.check_word_existence(word_choice):
                 print(f"\nNo results for {word_choice}.")
@@ -166,14 +215,14 @@ def menu():
                 word_instance.get_synonyms(word_choice)
                 word_instance.get_antonyms(word_choice)
 
-        elif choice == "2":
-            word_to_save = str(input("Enter word to save: ")).capitalize()
-            if not word_instance.check_word_existence(word_to_save):
+        elif choice == "2": #save word branch
+            word_to_upload = str(input("Enter word to save: ")).capitalize()
+            if not word_instance.check_word_existence(word_to_upload):
                 print("\nWord not found.")
             else:
-                wordbook_instance.upload_word(word_to_save)
+                wordbook_instance.upload_word(word_to_upload)
 
-        elif choice == "3":
+        elif choice == "3": #view wordbook branch
             with open(WORD_BOOK_FILENAME) as f:
                 wordbook_text = f.read()
             wordbook_list = wordbook_text.split()
@@ -182,7 +231,7 @@ def menu():
             else:
                 print("\nNo words have been saved yet.")
 
-        elif choice == "4":
+        elif choice == "4": #exit branch
             print("\nGoodbye...\n")
             os._exit(0)
 
