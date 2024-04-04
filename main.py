@@ -47,7 +47,7 @@ class Word:
         """
         endpoint = self.make_request(word_choice)
         return endpoint.status_code == 200
-        # returns true if word in dictionary, otherwise false
+        # returns true if word in dictionary, otherwise false.
 
     def make_request(self, word_choice):
         """Make a request to the api and return the data as a variable.
@@ -95,7 +95,7 @@ class Word:
         endpoint = self.make_request(word_choice)  # makes request and retrieves the data.
         json_data = endpoint.json()  # formats the data.
         meanings = json_data[0]["meanings"]
-        for meaning in meanings:  # filters the data
+        for meaning in meanings:  # filters the data.
             synonyms = meaning.get("synonyms", [])
         print(f"\nSYNONYMS of {word_choice}:")
         if synonyms:  # verifies synonyms are found in dictionary.
@@ -115,7 +115,7 @@ class Word:
         """
         endpoint = self.make_request(word_choice)  # makes request and retrieves the data.
         json_data = endpoint.json()  # formats the data.
-        for meaning in json_data[0]["meanings"]:  # filters the data
+        for meaning in json_data[0]["meanings"]:  # filters the data.
             antonyms = meaning.get("antonyms", [])
         print(f"\nANTONYMS of {word_choice}:")
         if antonyms:  # verifies antonyms are found in dictionary.
@@ -184,7 +184,7 @@ def wordbook_remove_options():
     """Sub-menu for the user to remove a word."""
     wordbook_instance = WordBook()
     wordbook_instance.view_wordbook()
-    while True:  # remove options loop
+    while True:  # remove options loop.
         remove_choice = input("Enter 'm' for menu or 'x' to remove a word: ").lower()
 
         if remove_choice == "m":  # returns the user to menu.
@@ -209,9 +209,8 @@ def menu():
         print("2. Save Word")
         print("3. View WordBook")
         print("4. Exit")
-        choice = input("Enter Choice: ").lower()  # input for branch choice.
-
-        if choice == "1":  # search word branch
+        choice = input("Enter Choice Number: ")  # input for branch choice.
+        if choice == "1":  # search word branch.
             word_choice = str(input("\nEnter Word:")).capitalize()
             if not word_instance.check_word_existence(word_choice):
                 print(f"\nNo results for {word_choice}.")
@@ -220,14 +219,14 @@ def menu():
                 word_instance.get_synonyms(word_choice)
                 word_instance.get_antonyms(word_choice)
 
-        elif choice == "2":  # save word branch
+        elif choice == "2":  # save word branch.
             word_to_upload = str(input("Enter word to save: ")).capitalize()
             if not word_instance.check_word_existence(word_to_upload):
                 print("\nWord not found.")
             else:
                 wordbook_instance.upload_word(word_to_upload)
 
-        elif choice == "3":  # view wordbook branch
+        elif choice == "3":  # view wordbook branch.
             with open(WORD_BOOK_FILENAME) as f:
                 wordbook_text = f.read()
             wordbook_list = wordbook_text.split()
@@ -236,9 +235,9 @@ def menu():
             else:
                 print("\nNo words have been saved yet.")
 
-        elif choice == "4":  # exit branch
+        elif choice == "4":  # exit branch.
             print("\nGoodbye...\n")
-            os._exit(0)
+            os._exit(1)
 
         else:
             print("\n--Invalid Choice--")
